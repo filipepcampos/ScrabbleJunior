@@ -1,15 +1,15 @@
 #include <iostream>
-#include "Pool.h"
-Pool::Pool(const std::vector <char>& letters)
+#include "ScrabbleJunior.h"
+Pool::Pool(const std::vector <char> &letters)
 {
+	allLetters = letters;
 	int number;
 	for (int i = 0; i < 7; i++)
 	{
-		number = rand() % (letters.size());
-		lettersBag.push_back(letters.at(number));
-		letters.erase(letters.begin() + number);
+		number = rand() % (allLetters.size());
+		lettersBag.push_back(allLetters.at(number));
+		allLetters.erase(allLetters.begin()+number);
 	}
-	allLetters = letters;
 }
 Pool::~Pool()
 {
@@ -25,16 +25,16 @@ std::vector<char> Pool::getAllLetters()const
 }
 void Pool::removeLetter(char letter)
 {
-	lettersBag.erase(std::find(lettersBag.begin(), lettersBag.end(), toupper(letter)));
+	lettersBag.erase(std::find(lettersBag.begin(),lettersBag.end(),toupper(letter)));
 }
-void Pool::addLetter()
+void Pool::addLetter(std::vector <char> &letters)
 {
-	int number = rand() % (allLetters.size());
-	lettersBag.push_back(allLetters.at(number));
-	letters.erase(allLetters.begin() + number);
+	int number = rand() % (letters.size());
+	lettersBag.push_back(letters.at(number));
+	letters.erase(letters.begin() + number);
 
 }
-void Pool::showBag()
+void Pool::showBag()const
 {
 	for (int i = 0; i < 7; i++)
 	{
