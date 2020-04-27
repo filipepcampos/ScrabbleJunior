@@ -51,8 +51,9 @@ int Board::play(char letter, char vertical_char, char horizontal_char){
 
 int Board::attributePoints(int v_pos, int h_pos) {
     int points = 0;
-    for(int v = 1, h = 0; h <= 1; v--, h++){
-        char line = 'V' * v + 'H' * h;
+    orientation lines[2] = {H, V};
+    for(int i = 0; i <= 1; i++){
+        orientation line = lines[i];
         if(m_board[v_pos][h_pos].line[line]){
             bool complete = verifyTilePlacement(v_pos, h_pos, line, -1) && verifyTilePlacement(v_pos, h_pos, line, 1);
             points += complete;
@@ -62,18 +63,18 @@ int Board::attributePoints(int v_pos, int h_pos) {
 }
 
 bool Board::validate(char letter, int v_pos, int h_pos){
-    if (m_board[v_pos][h_pos].letter != letter
-        || v_pos < 0 || v_pos > m_height - 1
-        || h_pos < 0 || h_pos > m_width - 1){
+    if (v_pos < 0 || v_pos > m_height - 1
+        || h_pos < 0 || h_pos > m_width - 1
+        || m_board[v_pos][h_pos].letter != letter){
         return false;
     }
     bool valid[2] = {false, false};
-    // Switch between vertical and horizontal lines with v=1,h=0 and v=0, h=1
-    for(int v = 1, h = 0; h <= 1; v--, h++){
-        char line = 'V' * v + 'H' * h;
-        std::cout << "line " << line << ": " << m_board[v_pos][h_pos].line[line] << std::endl;
+
+    orientation lines[2] = {H, V};
+    for(int i = 0; i <= 1; i++){
+        orientation line = lines[i];
         if(m_board[v_pos][h_pos].line[line]){
-            valid[v] = verifyTilePlacement(v_pos, h_pos, line, -1);
+            valid[line] = verifyTilePlacement(v_pos, h_pos, line, -1);
         }
     }
     return valid[0] || valid[1];
@@ -116,37 +117,36 @@ void Board::fillBoard(std::ifstream &file) {
 
 void Board::addWord(Word &word) {
     int v_pos = word.vertical_char - 'A', h_pos = word.horizontal_char - 'a';
-    int v = word.orientation == 'V' ? 1 : 0, h = 1 - v;
+    orientation line = word.orientation == 'V' ? V : H;
 
     for (int i = 0; i < word.text.length(); ++i) {
-        m_board[v_pos + i * v][h_pos + i * h].letter = word.text[i];
-        m_board[v_pos + i * v][h_pos + i * h].line[word.orientation] = true;
+        m_board[v_pos + i * line][h_pos + i * (1-line)].letter = word.text[i];
+        m_board[v_pos + i * line][h_pos + i * (1-line)].line[line] = true;
     }
 
     if(word.text.length() > 1){
-        m_board[v_pos][h_pos].type[word.orientation] = 'S';
+        m_board[v_pos][h_pos].type[line] = 'S';
         int offset = word.text.length() - 1;
-        m_board[v_pos + offset * v][h_pos + offset * h].type[word.orientation] = 'E';
+        m_board[v_pos + offset * line][h_pos + offset * (1-line)].type[line] = 'E';
     }
     else{
-        m_board[v_pos][h_pos].type[word.orientation] = 'O';
+        m_board[v_pos][h_pos].type[line] = 'O';
     }
 
 }
 
-bool Board::verifyTilePlacement(int v_pos, int h_pos, char line, int direction) {
+bool Board::verifyTilePlacement(int v_pos, int h_pos, orientation line, int direction) {
     bool complete = true;
     char target = direction == 1 ? 'E' : 'S';
-    int v = line == 'V' ? 1 : 0,  h = 1 - v;
 
     int n = -1;
     do{
         ++n;
-        if(n != 0 && !m_board[v_pos + direction * n * v][h_pos + direction * n * h].placed) { // for n = 0 the tile will always be placed
+        if(n != 0 && !m_board[v_pos + direction * n * line][h_pos + direction * n * (1-line)].placed) { // for n = 0 the tile will always be placed
             complete = false;
         }
-    } while(m_board[v_pos + direction * n * v][h_pos + direction * n * h].type[line] != target &&
-            m_board[v_pos + direction * n * v][h_pos + direction * n * h].type[line] != 'O');
+    } while(m_board[v_pos + direction * n * line][h_pos + direction * n * (1-line)].type[line] != target &&
+            m_board[v_pos + direction * n * line][h_pos + direction * n * (1-line)].type[line] != 'O');
 
     return complete;
 }

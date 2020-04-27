@@ -18,6 +18,7 @@ struct Word{
     std::string text;
 };
 
+enum orientation{H, V};
 
 /**
  * Represent a position in the game board
@@ -31,8 +32,8 @@ struct Word{
 struct Position{
     char letter = ' ';
     bool placed = false;
-    std::map<char, bool> line = {{'H', false}, {'V', false}};
-    std::map<char, char> type = {{'H', 0}, {'V', 0}};
+    std::map<char, bool> line = {{0, false}, {1, false}};
+    std::map<char, char> type = {{0, 0}, {1, 0}};
 };
 
 class Board{
@@ -57,7 +58,7 @@ public:
 
     /**
      * Get a std::vector<char> with all letters present in the board
-     * @return
+     * @return (none)
      */
     std::vector<char> getLetters();
 
@@ -77,7 +78,7 @@ private:
      * After making a play attribute the correct amount of points for words completed
      * @param v_pos
      * @param h_pos
-     * @return
+     * @return (none)
      */
     int attributePoints(int v_pos, int h_pos);
 
@@ -90,7 +91,7 @@ private:
      *                 direction == 1, the method will check until 'E' is found
      * @return Bool, true if all tiles are placed along the given line and direction
      */
-    bool verifyTilePlacement(int v_pos, int h_pos, char line, int direction);
+    bool verifyTilePlacement(int v_pos, int h_pos, orientation line, int direction);
 
     /**
      * Add a Word to m_board and m_board_info
