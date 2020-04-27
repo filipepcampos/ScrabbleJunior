@@ -71,6 +71,7 @@ bool Board::validate(char letter, int v_pos, int h_pos){
     // Switch between vertical and horizontal lines with v=1,h=0 and v=0, h=1
     for(int v = 1, h = 0; h <= 1; v--, h++){
         char line = 'V' * v + 'H' * h;
+        std::cout << "line " << line << ": " << m_board[v_pos][h_pos].line[line] << std::endl;
         if(m_board[v_pos][h_pos].line[line]){
             valid[v] = verifyTilePlacement(v_pos, h_pos, line, -1);
         }
@@ -122,9 +123,15 @@ void Board::addWord(Word &word) {
         m_board[v_pos + i * v][h_pos + i * h].line[word.orientation] = true;
     }
 
-    m_board[v_pos][h_pos].type[word.orientation] = 'S';
-    int offset = word.text.length() - 1;
-    m_board[v_pos + offset * v][h_pos + offset * h].type[word.orientation] = 'E';
+    if(word.text.length() > 1){
+        m_board[v_pos][h_pos].type[word.orientation] = 'S';
+        int offset = word.text.length() - 1;
+        m_board[v_pos + offset * v][h_pos + offset * h].type[word.orientation] = 'E';
+    }
+    else{
+        m_board[v_pos][h_pos].type[word.orientation] = 'O';
+    }
+
 }
 
 bool Board::verifyTilePlacement(int v_pos, int h_pos, char line, int direction) {
@@ -138,7 +145,8 @@ bool Board::verifyTilePlacement(int v_pos, int h_pos, char line, int direction) 
         if(n != 0 && !m_board[v_pos + direction * n * v][h_pos + direction * n * h].placed) { // for n = 0 the tile will always be placed
             complete = false;
         }
-    } while(m_board[v_pos + direction * n * v][h_pos + direction * n * h].type[line] != target);
+    } while(m_board[v_pos + direction * n * v][h_pos + direction * n * h].type[line] != target &&
+            m_board[v_pos + direction * n * v][h_pos + direction * n * h].type[line] != 'O');
 
     return complete;
 }

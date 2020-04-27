@@ -25,7 +25,8 @@ struct Word{
  * Orientation allows to distinguish between horizontal and vertical words (If someone plays a letter that only belongs
  * to a vertical word there's no need to check if a horizontal word was completed for example)
  * Type marks the start and end of a word with 'S' and 'E' for a given orientation (this allows to distinguish between
- * the start of a horizontal word from the start of a vertical word, for example)
+ * the start of a horizontal word from the start of a vertical word, for example). If a word only has a single letter
+ * then it will be marked with 'O'
  */
 struct Position{
     char letter = ' ';
@@ -36,7 +37,7 @@ struct Position{
 
 class Board{
 public:
-    Board(const std::string &file_name);
+    explicit Board(const std::string &file_name);
     ~Board();
 
     /**
