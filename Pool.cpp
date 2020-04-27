@@ -27,11 +27,11 @@ void Pool::removeLetter(char letter)
 {
 	lettersBag.erase(std::find(lettersBag.begin(),lettersBag.end(),toupper(letter)));
 }
-void Pool::addLetter(std::vector <char> &letters)
+void Pool::addLetter()
 {
-	int number = rand() % (letters.size());
-	lettersBag.push_back(letters.at(number));
-	letters.erase(letters.begin() + number);
+	int number = rand() % (allLetters.size());
+	lettersBag.push_back(allLetters.at(number));
+	allLetters.erase(allLetters.begin() + number);
 
 }
 void Pool::showBag()const
