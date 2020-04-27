@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ScrabbleJunior.h"
+#include "Pool.h"
 Pool::Pool(const std::vector <char> &letters)
 {
 	allLetters = letters;
