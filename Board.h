@@ -100,20 +100,22 @@ private:
      Position* getPosition(int v_pos, int h_pos, orientation line, int n);
 
     /**
-     * Verify if words is completed along a line
-     * @param v_pos starting vertical position
-     * @param h_pos starting horizontal position
-     * @param line  H or V
-     * @return (bool) true if all tiles are placed along the given line
-     */
-    bool checkForwardPlacement(int v_pos, int h_pos, orientation line);
-
-    /**
      * Add a Word to m_board and m_board_info
      * @param word
      * @return (none)
      */
     void addWord(Word &word);
+
+    /**
+     * Shift start and end markers from starting position along line and direction
+     * If direction == -1, end marker will be shifted to the left
+     * If direction == 1, start marker will be shifted to the right
+     * @param v
+     * @param h
+     * @param line
+     * @param direction
+     */
+    void shiftMarker(int v, int h, orientation line, int direction);
 
     /**
      * Read Words from board file and fill the board

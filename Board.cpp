@@ -44,7 +44,7 @@ std::vector<char> Board::getPlayableLetters() const{
     std::vector<char> letters;
     for(int i = 0; i < m_height; i++){
         for(int j = 0; j < m_width; j++){
-            if(m_board[i][j].info[H].start || m_board[i][j].info[V].end){
+            if(m_board[i][j].info[H].start || m_board[i][j].info[V].start){
                 letters.push_back(m_board[i][j].letter);
             }
         }
@@ -77,23 +77,34 @@ bool Board::placeLetter(char letter, int v_pos, int h_pos, int &points){
         if(m_board[v_pos][h_pos].info[line].belongsToLine){
             // backwards and forwards show if all tiles behind and in front of the position are placed
             bool placed_behind = m_board[v_pos][h_pos].info[line].start;
-            bool placed_front = checkForwardPlacement(v_pos, h_pos, line);
+            bool placed_front = m_board[v_pos][h_pos].info[line].end;
             valid[line] = placed_behind;
             points += placed_behind && placed_front;
 
             m_board[v_pos][h_pos].info[line].start = false;
+            m_board[v_pos][h_pos].info[line].end = false;
 
+            if(!placed_behind && placed_front){
+                shiftMarker(v_pos, h_pos, line, -1);
+            }
             if(!placed_front && placed_behind){
-                int v = v_pos, h = h_pos;
-                do{
-                    v += line;
-                    h += 1-line;
-                } while(m_board[v][h].placed);
-                m_board[v][h].info[line].start = true;
+                shiftMarker(v_pos, h_pos, line, 1);
             }
         }
     }
     return valid[0] || valid[1];
+}
+
+void Board::shiftMarker(int v, int h, orientation line, int direction){
+    do{
+        v += line * direction;
+        h += (1-line) * direction;
+    } while(m_board[v][h].placed);
+
+    switch(direction){
+        case -1: m_board[v][h].info[line].end = true; break;
+        case 1: m_board[v][h].info[line].start = true; break;
+    }
 }
 
 void Board::print() const{
@@ -148,19 +159,4 @@ void Board::addWord(Word &word) {
 
 Position* Board::getPosition(int v_pos, int h_pos, orientation line, int n){
     return &m_board[v_pos + n * line][h_pos + n * (1-line)];
-}
-
-bool Board::checkForwardPlacement(int v_pos, int h_pos, orientation line) {
-    bool complete = true;
-    int n = -1;
-    Position *pos;
-    do{
-        ++n;
-        pos = getPosition(v_pos, h_pos, line, n);
-        if(n != 0 && !pos->placed) { // for n = 0 the tile will always be placed
-            complete = false;
-        }
-    } while(!pos->info[line].end);
-
-    return complete;
 }
