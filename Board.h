@@ -21,19 +21,25 @@ struct Word{
 enum orientation{H, V};
 
 /**
+ * belongsToLine = true if the position has a word in a specific line crossing it.
+ * If start = true the position is playable and the first non-empty tile of a word along a specific line
+ * If end = true the position if the last tile of a word
+ */
+struct LinePositionInformation{
+    bool belongsToLine = false;
+    bool start = false;
+    bool end = false;
+};
+
+/**
  * Represent a position in the game board
  * If a letter has been placed in this position, placed = true
- * Orientation allows to distinguish between horizontal and vertical words (If someone plays a letter that only belongs
- * to a vertical word there's no need to check if a horizontal word was completed for example)
- * Type marks the start and end of a word with 'S' and 'E' for a given orientation (this allows to distinguish between
- * the start of a horizontal word from the start of a vertical word, for example). If a word only has a single letter
- * then it will be marked with 'O'
+ * Each position includes information for horizontal and vertical line
  */
 struct Position{
     char letter = ' ';
     bool placed = false;
-    std::map<char, bool> line = {{0, false}, {1, false}};
-    std::map<char, char> type = {{0, 0}, {1, 0}};
+    std::map<orientation, LinePositionInformation> info = {{H, {}}, {V, {}}};
 };
 
 class Board{
@@ -54,44 +60,53 @@ public:
      * Print the game board to the screen
      * @return (none)
      */
-    void print();
+    void print() const;
 
     /**
      * Get a std::vector<char> with all letters present in the board
-     * @return (none)
+     * @return (std::vector<char>)
      */
-    std::vector<char> getLetters();
+    std::vector<char> getLetters() const;
+
+    /**
+     * Get a std::vector<char> with all playable letters present in the board
+     * @return (std::vector<char>)
+     */
+    std::vector<char> getPlayableLetters() const;
 
 private:
     Position **m_board;
     int m_height = 0, m_width = 0;
 
     /**
-     * Make sure
+     * Try to place a letter on the board
+     * Verifies if a letter can be placed returning the bool result
+     * If a word was completed points will be added through reference
      * @param vertical_pos
      * @param horizontal_pos
-     * @return
+     * @param &points
+     * @return (bool) valid or not
      */
-    bool validate(char letter, int vertical_pos, int horizontal_pos);
+    bool placeLetter(char letter, int vertical_pos, int horizontal_pos, int &points);
 
     /**
-     * After making a play attribute the correct amount of points for words completed
+     * Get nth position from a given starting point along the specified line
      * @param v_pos
      * @param h_pos
-     * @return (none)
+     * @param line
+     * @param n
+     * @return (Position*)
      */
-    int attributePoints(int v_pos, int h_pos);
+     Position* getPosition(int v_pos, int h_pos, orientation line, int n);
 
     /**
-     * Verify if words is completed along a line in a certain direction
+     * Verify if words is completed along a line
      * @param v_pos starting vertical position
      * @param h_pos starting horizontal position
-     * @param line 'H' or 'V'
-     * @param direction -1 or 1, if direction == -1 the method will check until 'S' is found, if
-     *                 direction == 1, the method will check until 'E' is found
-     * @return Bool, true if all tiles are placed along the given line and direction
+     * @param line  H or V
+     * @return (bool) true if all tiles are placed along the given line
      */
-    bool verifyTilePlacement(int v_pos, int h_pos, orientation line, int direction);
+    bool checkForwardPlacement(int v_pos, int h_pos, orientation line);
 
     /**
      * Add a Word to m_board and m_board_info
