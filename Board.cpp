@@ -53,6 +53,10 @@ std::vector<char> Board::getPlayableLetters() const{
     return letters;
 }
 
+bool Board::gameOver() const{
+    return m_empty_tiles <= 0;
+}
+
 int Board::play(char letter, char vertical_char, char horizontal_char){
     int v_pos = vertical_char - 'A', h_pos = horizontal_char - 'a';
     int points = 0;
@@ -80,17 +84,22 @@ bool Board::placeLetter(char letter, int v_pos, int h_pos, int &points){
 
         if(placed_behind || placed_front){
             valid[line] = placed_behind;
-            points += placed_behind && placed_front;
 
             m_board[v_pos][h_pos].markers[line].start = false;
             m_board[v_pos][h_pos].markers[line].end = false;
 
-            // If word wasn't completed yet, shift the markers
-            if(!placed_behind){
-                shiftMarker(v_pos, h_pos, line, -1);
+            if(placed_behind && placed_front){
+                points++;
+                m_empty_tiles--;
             }
-            if(!placed_front){
-                shiftMarker(v_pos, h_pos, line, 1);
+            else{
+                // If word wasn't completed yet, shift the markers
+                if(!placed_behind){
+                    shiftMarker(v_pos, h_pos, line, -1);
+                }
+                if(!placed_front){
+                    shiftMarker(v_pos, h_pos, line, 1);
+                }
             }
         }
     }
@@ -152,7 +161,11 @@ void Board::addWord(Word &word) {
     orientation line = word.orientation == 'V' ? V : H;
 
     for (int i = 0; i < word.text.length(); ++i) {
-        m_board[v_pos + i * line][h_pos + i * (1-line)].letter = word.text[i];
+        Position *p = &m_board[v_pos + i * line][h_pos + i * (1-line)];
+        if(!p->placed){
+            m_empty_tiles++;
+            p->letter = word.text[i];
+        }
     }
 
     m_board[v_pos][h_pos].markers[line].start = true;

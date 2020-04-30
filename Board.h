@@ -63,6 +63,12 @@ public:
     void print() const;
 
     /**
+     * Check if game has ended
+     * @return (bool) true if game is over, false otherwise
+     */
+     bool gameOver() const;
+
+    /**
      * Get a std::vector<char> with all letters present in the board
      * @return (std::vector<char>)
      */
@@ -77,6 +83,7 @@ public:
 private:
     Position **m_board;
     int m_height = 0, m_width = 0;
+    int m_empty_tiles = 0;
 
     /**
      * Try to place a letter on the board
