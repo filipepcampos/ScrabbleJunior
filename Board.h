@@ -86,15 +86,20 @@ private:
     int m_empty_tiles = 0;
 
     /**
-     * Try to place a letter on the board
      * Verifies if a letter can be placed returning the bool result
-     * If a word was completed points will be added through reference
      * @param vertical_pos
      * @param horizontal_pos
-     * @param &points
      * @return (bool) valid or not
      */
-    bool placeLetter(char letter, int vertical_pos, int horizontal_pos, int &points);
+    bool validateLetter(char letter, int vertical_pos, int horizontal_pos);
+
+    /**
+     * Place a letter, shift markers if needed and return points won
+     * @param vertical_pos
+     * @param horizontal_pos
+     * @return (int) points won by placement
+     */
+    int placeLetter(int vertical_pos, int horizontal_pos);
 
     /**
      * Add a Word to m_board and m_board_info

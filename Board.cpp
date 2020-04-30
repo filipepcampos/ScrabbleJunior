@@ -59,15 +59,13 @@ bool Board::gameOver() const{
 
 int Board::play(char letter, char vertical_char, char horizontal_char){
     int v_pos = vertical_char - 'A', h_pos = horizontal_char - 'a';
-    int points = 0;
-    if (placeLetter(letter, v_pos, h_pos, points)){
-        m_board[v_pos][h_pos].placed = true;
-        return points;
+    if (validateLetter(letter, v_pos, h_pos)){
+        return placeLetter(v_pos, h_pos);
     }
     return -1;
 }
 
-bool Board::placeLetter(char letter, int v_pos, int h_pos, int &points){
+bool Board::validateLetter(char letter, int v_pos, int h_pos){
     if (v_pos < 0 || v_pos > m_height - 1 || h_pos < 0 || h_pos > m_width - 1
                   || m_board[v_pos][h_pos].placed   || m_board[v_pos][h_pos].letter != letter){
         return false;
@@ -77,33 +75,39 @@ bool Board::placeLetter(char letter, int v_pos, int h_pos, int &points){
 
     for(int i = 0; i <= 1; i++){
         orientation line = lines[i];
-        // If placed_behind, all tiles behind the given position are placed
-        // If placed_forward all tiles beyond the given position are placed
+        valid[line] = m_board[v_pos][h_pos].markers[line].start;
+    }
+    return valid[0] || valid[1];
+}
+
+int Board::placeLetter(int v_pos, int h_pos){
+    m_board[v_pos][h_pos].placed = true;
+    m_empty_tiles--;
+    int points = 0;
+    orientation lines[] = {H, V};
+
+    for(int i = 0; i <= 1; i++){
+        orientation line = lines[i];
         bool placed_behind = m_board[v_pos][h_pos].markers[line].start;
         bool placed_front = m_board[v_pos][h_pos].markers[line].end;
 
-        if(placed_behind || placed_front){
-            valid[line] = placed_behind;
+        m_board[v_pos][h_pos].markers[line].start = false;
+        m_board[v_pos][h_pos].markers[line].end = false;
 
-            m_board[v_pos][h_pos].markers[line].start = false;
-            m_board[v_pos][h_pos].markers[line].end = false;
-
-            if(placed_behind && placed_front){
-                points++;
-                m_empty_tiles--;
+        if(placed_behind && placed_front){
+            points++;
+        }
+        else{
+            // If word wasn't completed yet, shift the markers
+            if(!placed_behind && placed_front){
+                shiftMarker(v_pos, h_pos, line, -1);
             }
-            else{
-                // If word wasn't completed yet, shift the markers
-                if(!placed_behind){
-                    shiftMarker(v_pos, h_pos, line, -1);
-                }
-                if(!placed_front){
-                    shiftMarker(v_pos, h_pos, line, 1);
-                }
+            if(!placed_front && placed_behind) {
+                shiftMarker(v_pos, h_pos, line, 1);
             }
         }
     }
-    return valid[0] || valid[1];
+    return points;
 }
 
 void Board::shiftMarker(int v, int h, orientation line, int direction){
@@ -162,7 +166,7 @@ void Board::addWord(Word &word) {
 
     for (int i = 0; i < word.text.length(); ++i) {
         Position *p = &m_board[v_pos + i * line][h_pos + i * (1-line)];
-        if(!p->placed){
+        if(p->letter == ' '){
             m_empty_tiles++;
             p->letter = word.text[i];
         }
