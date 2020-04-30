@@ -21,12 +21,12 @@ struct Word{
 enum orientation{H, V};
 
 /**
- * belongsToLine = true if the position has a word in a specific line crossing it.
+ * Mark the start and end of a word if a tile is placed on a marker it is shifted to the nearest tile that has not been
+ * placed.
  * If start = true the position is playable and the first non-empty tile of a word along a specific line
- * If end = true the position if the last tile of a word
+ * If end = true the position if the last playable tile of a word
  */
-struct LinePositionInformation{
-    bool belongsToLine = false;
+struct Markers{
     bool start = false;
     bool end = false;
 };
@@ -39,7 +39,7 @@ struct LinePositionInformation{
 struct Position{
     char letter = ' ';
     bool placed = false;
-    std::map<orientation, LinePositionInformation> info = {{H, {}}, {V, {}}};
+    std::map<orientation, Markers> markers = {{H, {}}, {V, {}}};
 };
 
 class Board{
@@ -88,16 +88,6 @@ private:
      * @return (bool) valid or not
      */
     bool placeLetter(char letter, int vertical_pos, int horizontal_pos, int &points);
-
-    /**
-     * Get nth position from a given starting point along the specified line
-     * @param v_pos
-     * @param h_pos
-     * @param line
-     * @param n
-     * @return (Position*)
-     */
-     Position* getPosition(int v_pos, int h_pos, orientation line, int n);
 
     /**
      * Add a Word to m_board and m_board_info

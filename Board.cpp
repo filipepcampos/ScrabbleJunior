@@ -3,6 +3,7 @@
 #include <string>
 #include <limits>
 #include <iostream>
+#include <cassert>
 
 Board::Board(const std::string &file_name){
     std::ifstream file;
@@ -44,7 +45,7 @@ std::vector<char> Board::getPlayableLetters() const{
     std::vector<char> letters;
     for(int i = 0; i < m_height; i++){
         for(int j = 0; j < m_width; j++){
-            if(m_board[i][j].info[H].start || m_board[i][j].info[V].start){
+            if(m_board[i][j].markers[H].start || m_board[i][j].markers[V].start){
                 letters.push_back(m_board[i][j].letter);
             }
         }
@@ -63,31 +64,32 @@ int Board::play(char letter, char vertical_char, char horizontal_char){
 }
 
 bool Board::placeLetter(char letter, int v_pos, int h_pos, int &points){
-    if (v_pos < 0 || v_pos > m_height - 1
-        || h_pos < 0 || h_pos > m_width - 1
-        || m_board[v_pos][h_pos].placed
-        || m_board[v_pos][h_pos].letter != letter){
+    if (v_pos < 0 || v_pos > m_height - 1 || h_pos < 0 || h_pos > m_width - 1
+                  || m_board[v_pos][h_pos].placed   || m_board[v_pos][h_pos].letter != letter){
         return false;
     }
     bool valid[2] = {false, false};
-
     orientation lines[2] = {H, V};
+
     for(int i = 0; i <= 1; i++){
         orientation line = lines[i];
-        if(m_board[v_pos][h_pos].info[line].belongsToLine){
-            // backwards and forwards show if all tiles behind and in front of the position are placed
-            bool placed_behind = m_board[v_pos][h_pos].info[line].start;
-            bool placed_front = m_board[v_pos][h_pos].info[line].end;
+        // If placed_behind, all tiles behind the given position are placed
+        // If placed_forward all tiles beyond the given position are placed
+        bool placed_behind = m_board[v_pos][h_pos].markers[line].start;
+        bool placed_front = m_board[v_pos][h_pos].markers[line].end;
+
+        if(placed_behind || placed_front){
             valid[line] = placed_behind;
             points += placed_behind && placed_front;
 
-            m_board[v_pos][h_pos].info[line].start = false;
-            m_board[v_pos][h_pos].info[line].end = false;
+            m_board[v_pos][h_pos].markers[line].start = false;
+            m_board[v_pos][h_pos].markers[line].end = false;
 
-            if(!placed_behind && placed_front){
+            // If word wasn't completed yet, shift the markers
+            if(!placed_behind){
                 shiftMarker(v_pos, h_pos, line, -1);
             }
-            if(!placed_front && placed_behind){
+            if(!placed_front){
                 shiftMarker(v_pos, h_pos, line, 1);
             }
         }
@@ -96,14 +98,17 @@ bool Board::placeLetter(char letter, int v_pos, int h_pos, int &points){
 }
 
 void Board::shiftMarker(int v, int h, orientation line, int direction){
+    assert(direction == 1 || direction == -1);
     do{
         v += line * direction;
         h += (1-line) * direction;
     } while(m_board[v][h].placed);
 
-    switch(direction){
-        case -1: m_board[v][h].info[line].end = true; break;
-        case 1: m_board[v][h].info[line].start = true; break;
+    if(direction == 1){
+        m_board[v][h].markers[line].start = true;
+    }
+    else{
+        m_board[v][h].markers[line].end = true;
     }
 }
 
@@ -147,16 +152,10 @@ void Board::addWord(Word &word) {
     orientation line = word.orientation == 'V' ? V : H;
 
     for (int i = 0; i < word.text.length(); ++i) {
-        Position *pos = getPosition(v_pos, h_pos, line, i);
-        pos->letter = word.text[i];
-        pos->info[line].belongsToLine = true;
+        m_board[v_pos + i * line][h_pos + i * (1-line)].letter = word.text[i];
     }
 
-    m_board[v_pos][h_pos].info[line].start = true;
+    m_board[v_pos][h_pos].markers[line].start = true;
     int offset = word.text.length() - 1;
-    getPosition(v_pos, h_pos, line, offset)->info[line].end = true;
-}
-
-Position* Board::getPosition(int v_pos, int h_pos, orientation line, int n){
-    return &m_board[v_pos + n * line][h_pos + n * (1-line)];
+    m_board[v_pos + offset * line][h_pos + offset * (1-line)].markers[line].end = true;
 }
