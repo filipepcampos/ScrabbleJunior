@@ -65,7 +65,7 @@ int Board::play(char letter, char vertical_char, char horizontal_char){
     return -1;
 }
 
-bool Board::validateLetter(char letter, int v_pos, int h_pos){
+bool Board::validateLetter(char letter, int v_pos, int h_pos) const{
     if (v_pos < 0 || v_pos > m_height - 1 || h_pos < 0 || h_pos > m_width - 1
                   || m_board[v_pos][h_pos].placed   || m_board[v_pos][h_pos].letter != letter){
         return false;
@@ -112,16 +112,18 @@ int Board::placeLetter(int v_pos, int h_pos){
 
 void Board::shiftMarker(int v, int h, orientation line, int direction){
     assert(direction == 1 || direction == -1);
+    Position *pos;
+    short i = 1;
     do{
-        v += line * direction;
-        h += (1-line) * direction;
-    } while(m_board[v][h].placed);
+        pos = getPosition(v, h, line, i * direction);
+        i++;
+    } while(pos->placed);
 
     if(direction == 1){
-        m_board[v][h].markers[line].start = true;
+        pos->markers[line].start = true;
     }
     else{
-        m_board[v][h].markers[line].end = true;
+        pos->markers[line].end = true;
     }
 }
 
@@ -165,7 +167,7 @@ void Board::addWord(Word &word) {
     orientation line = word.orientation == 'V' ? V : H;
 
     for (int i = 0; i < word.text.length(); ++i) {
-        Position *p = &m_board[v_pos + i * line][h_pos + i * (1-line)];
+        Position *p = getPosition(v_pos, h_pos, line, i);
         if(p->letter == ' '){
             m_empty_tiles++;
             p->letter = word.text[i];
@@ -174,5 +176,10 @@ void Board::addWord(Word &word) {
 
     m_board[v_pos][h_pos].markers[line].start = true;
     int offset = word.text.length() - 1;
-    m_board[v_pos + offset * line][h_pos + offset * (1-line)].markers[line].end = true;
+    getPosition(v_pos, h_pos, line, offset)->markers[line].end = true;
+}
+
+Position *Board::getPosition(int v, int h, orientation line, int n) {
+    short line_int = line == V ? 1 : 0;
+    return &m_board[v + n * line_int][h + n * (1-line_int)];
 }

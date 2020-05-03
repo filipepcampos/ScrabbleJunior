@@ -18,6 +18,9 @@ struct Word{
     std::string text;
 };
 
+/**
+ * Represents a line orientation (Horizontal or Vertical)
+ */
 enum orientation{H, V};
 
 /**
@@ -91,7 +94,7 @@ private:
      * @param horizontal_pos
      * @return (bool) valid or not
      */
-    bool validateLetter(char letter, int vertical_pos, int horizontal_pos);
+    bool validateLetter(char letter, int vertical_pos, int horizontal_pos) const;
 
     /**
      * Place a letter, shift markers if needed and return points won
@@ -124,4 +127,10 @@ private:
      * @return (none)
      */
     void fillBoard(std::ifstream &file);
+
+    /**
+     * Get nth position counting from (v, h) along the given line
+     * @return (Position*)
+     */
+    Position* getPosition(int v, int h, orientation line, int n);
 };
