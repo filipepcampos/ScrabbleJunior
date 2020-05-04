@@ -12,8 +12,8 @@
  * vertical_char and horizontal_char represent input ('A' through 'Z' and 'a' through 'z')
  */
 struct Word{
-    char vertical_char;
-    char horizontal_char;
+    int vertical_pos;
+    int horizontal_pos;
     char orientation;
     std::string text;
 };
@@ -71,6 +71,12 @@ public:
      */
      bool gameOver() const;
 
+     /**
+      * Return m_valid
+      * @return (bool)
+      */
+     bool valid() const;
+
     /**
      * Get a std::vector<char> with all letters present in the board
      * @return (std::vector<char>)
@@ -87,6 +93,7 @@ private:
     Position **m_board;
     int m_height = 0, m_width = 0;
     int m_empty_tiles = 0;
+    bool m_valid = true;
 
     /**
      * Verifies if a letter can be placed returning the bool result
@@ -109,7 +116,13 @@ private:
      * @param word
      * @return (none)
      */
-    void addWord(Word &word);
+    bool addWord(const Word &word);
+
+    /**
+     * Verify if the given word is valid
+     * @return (bool) true if valid, false otherwise
+     */
+    bool validateWord(const Word &word) const;
 
     /**
      * Shift start and end markers from starting position along line and direction
