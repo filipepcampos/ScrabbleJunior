@@ -123,8 +123,8 @@ bool Board::gameOver() const{
     return m_empty_tiles <= 0;
 }
 
-bool Board::valid() const {
-    return m_valid;
+bool Board::valid(int n) const {
+    return m_valid && m_empty_tiles >= 7 * n;
 }
 
 int Board::play(char letter, char vertical_char, char horizontal_char){

@@ -72,10 +72,11 @@ public:
      bool gameOver() const;
 
      /**
-      * Return m_valid
+      * Return if board is valid and large enough for n players
+      * @param n - number of players
       * @return (bool)
       */
-     bool valid() const;
+     bool valid(int n) const;
 
     /**
      * Get a std::vector<char> with all letters present in the board
