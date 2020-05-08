@@ -17,16 +17,17 @@ Board::Board(const std::string &file_name){
     file >> m_height >> delimiter >> m_width;
     if(file.fail() || delimiter != 'x' || m_height <= 0 || m_height > 20 || m_width <= 0 || m_width > 20){
         m_valid = false;
+        return;
     }
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    if(m_valid){
-        m_board = new Position* [m_height];
-        for(int i = 0; i < m_height; ++i){
-            m_board[i] = new Position[m_width];
-        }
-        fillBoard(file);
+
+    m_board = new Position* [m_height];
+    for(int i = 0; i < m_height; ++i){
+        m_board[i] = new Position[m_width];
     }
+    fillBoard(file);
+    m_empty_tiles = m_total_tiles;
     file.close();
 }
 
@@ -54,26 +55,25 @@ void Board::fillBoard(std::ifstream &file) {
 }
 
 bool Board::addWord(const Word &word) {
-    if(!validateWord(word)){
-        return false;
-    }
-    orientation line = word.orientation == 'V' ? V : H;
-
-    for (int i = 0; i < word.text.length(); ++i) {
-        Position *p = getPosition(word.vertical_pos, word.horizontal_pos, line, i);
-        if(p->letter == ' '){
-            m_empty_tiles++;
-            p->letter = word.text[i];
+    if(validateWord(word)){
+        orientation line = word.orientation == 'V' ? V : H;
+        for (int i = 0; i < word.text.length(); ++i) {
+            Position *p = getPosition(word.vertical_pos, word.horizontal_pos, line, i);
+            if(p->letter == ' '){
+                m_total_tiles++;
+                p->letter = word.text[i];
+            }
+            else if(p->letter != word.text[i]){
+                return false;
+            }
         }
-        else if(p->letter != word.text[i]){
-            return false;
-        }
-    }
 
-    m_board[word.vertical_pos][word.horizontal_pos].markers[line].start = true;
-    int offset = word.text.length() - 1;
-    getPosition(word.vertical_pos, word.horizontal_pos, line, offset)->markers[line].end = true;
-    return true;
+        m_board[word.vertical_pos][word.horizontal_pos].markers[line].start = true;
+        int offset = word.text.length() - 1;
+        getPosition(word.vertical_pos, word.horizontal_pos, line, offset)->markers[line].end = true;
+        return true;
+    }
+    return false;
 }
 
 bool Board::validateWord(const Word &word) const{
@@ -97,6 +97,7 @@ Position *Board::getPosition(int v, int h, orientation line, int n) {
 
 std::vector<char> Board::getLetters() const{
     std::vector<char> letters;
+    letters.reserve(m_total_tiles);
     for(int i = 0; i < m_height; i++){
         for(int j = 0; j < m_width; j++){
             if(m_board[i][j].letter != ' '){

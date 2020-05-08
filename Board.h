@@ -93,7 +93,8 @@ public:
 private:
     Position **m_board;
     int m_height = 0, m_width = 0;
-    int m_empty_tiles = 0;
+    int m_total_tiles = 0;
+    int m_empty_tiles;
     bool m_valid = true;
 
     /**
