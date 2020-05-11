@@ -1,9 +1,8 @@
+#ifndef PLAYER_H
+#define PLAYER_H
 #include "Pool.h"
 #include "LettersBag.h"
 #include "Board.h"
-
-#ifndef PLAYER_H
-#define PLAYER_H
 
 class Player
 {

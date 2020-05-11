@@ -1,7 +1,6 @@
-#include "Pool.h"
-
 #ifndef LETTERSBAG_H
 #define LETTERSBAG_H
+#include "Pool.h"
 
 class LettersBag
 {
