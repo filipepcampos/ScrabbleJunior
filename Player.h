@@ -14,7 +14,7 @@ private:
     int score;
     void readInput();
 public:
-    Player(Board& board, Pool& pool);
+    Player(const Board& board,const Pool& pool);
     void play();
 
 };
