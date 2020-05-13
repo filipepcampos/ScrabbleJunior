@@ -10,8 +10,30 @@ class Pool
 {
 private:
     std::vector<char> allLetters;
+
+    /**
+     * Shuffle all chars in vector
+     * @param vec
+     */
+    static void shuffle(std::vector<char>& vec);
 public:
     explicit Pool(const std::vector<char>& letters);
+
+    /**
+     * Remove a letter from pool
+     * @return letter
+     */
     char draw();
+
+    /**
+     * If allLetters isn't empty output true, false otherwise
+     */
+    bool canDraw();
+
+    /**
+     * Add a new letter to the pool, reshuffling it
+     * @param c
+     */
+    void add(char c);
 };
 #endif

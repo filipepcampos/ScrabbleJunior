@@ -4,10 +4,12 @@
 #include <limits>
 #include <iostream>
 #include <cassert>
+#include "Colors.h"
 
 Board::Board(const std::string &file_name){
     std::ifstream file;
-    file.open(file_name);
+    std::string complete_file_name = file_name + ".txt";
+    file.open(complete_file_name);
     if(!file.is_open()){
         m_valid = false;
         return;
@@ -21,10 +23,9 @@ Board::Board(const std::string &file_name){
     }
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-
-    m_board = new Position* [m_height];
+    m_board = new detail::Position* [m_height];
     for(int i = 0; i < m_height; ++i){
-        m_board[i] = new Position[m_width];
+        m_board[i] = new detail::Position[m_width];
     }
     fillBoard(file);
     m_empty_tiles = m_total_tiles;
@@ -32,7 +33,7 @@ Board::Board(const std::string &file_name){
 }
 
 Board::~Board(){
-    if(m_valid){
+    if(m_board){
         for(int i=0; i < m_height; ++i){
             delete [] m_board[i];
         }
@@ -42,11 +43,11 @@ Board::~Board(){
 
 void Board::fillBoard(std::ifstream &file) {
     std::string buffer;
-    while(getline(file, buffer, '\n') && !buffer.empty() && !file.eof()){
+    while(getline(file, buffer) && !buffer.empty() && !file.eof()){
         char v_char = buffer[0], h_char = buffer[1], orientation = buffer[3];
         std::string text = buffer.substr(5);
         int v_pos = v_char - 'A', h_pos = h_char - 'a';
-        Word w{v_pos, h_pos, orientation, text};
+        detail::Word w{v_pos, h_pos, orientation, text};
         if(!addWord(w)){
             m_valid = false;
             break;
@@ -54,11 +55,11 @@ void Board::fillBoard(std::ifstream &file) {
     }
 }
 
-bool Board::addWord(const Word &word) {
+bool Board::addWord(const detail::Word &word) {
     if(validateWord(word)){
-        orientation line = word.orientation == 'V' ? V : H;
+        detail::orientation line = word.orientation == 'V' ? detail::V : detail::H;
         for (int i = 0; i < word.text.length(); ++i) {
-            Position *p = getPosition(word.vertical_pos, word.horizontal_pos, line, i);
+            detail::Position *p = getPosition(word.vertical_pos, word.horizontal_pos, line, i);
             if(p->letter == ' '){
                 m_total_tiles++;
                 p->letter = word.text[i];
@@ -76,10 +77,7 @@ bool Board::addWord(const Word &word) {
     return false;
 }
 
-bool Board::validateWord(const Word &word) const{
-    if(word.orientation != 'H' && word.orientation != 'V'){
-        return false;
-    }
+bool Board::validateWord(const detail::Word &word) const{
     for(auto c : word.text){
         if(!isalpha(c)){
             return false;
@@ -87,12 +85,12 @@ bool Board::validateWord(const Word &word) const{
     }
     int orientation_int = word.orientation == 'V' ? 1 : 0;
     return !(word.horizontal_pos < 0  || word.horizontal_pos + word.text.length() * (1 - orientation_int) > m_width
-             || word.vertical_pos < 0 || word.vertical_pos + word.text.length() * orientation_int > m_height);
+             || word.vertical_pos < 0 || word.vertical_pos + word.text.length() * orientation_int > m_height
+             || (word.orientation != 'H' && word.orientation != 'V'));
 }
 
-Position *Board::getPosition(int v, int h, orientation line, int n) {
-    short line_int = line == V ? 1 : 0;
-    return &m_board[v + n * line_int][h + n * (1 - line_int)];
+detail::Position *Board::getPosition(int v, int h, detail::orientation line, int n) {
+    return &m_board[v + n * line][h + n * (1 - line)];
 }
 
 std::vector<char> Board::getLetters() const{
@@ -112,7 +110,7 @@ std::vector<char> Board::getPlayableLetters() const{
     std::vector<char> letters;
     for(int i = 0; i < m_height; i++){
         for(int j = 0; j < m_width; j++){
-            if(m_board[i][j].markers[H].start || m_board[i][j].markers[V].start){
+            if(m_board[i][j].markers[detail::H].start || m_board[i][j].markers[detail::V].start){
                 letters.push_back(m_board[i][j].letter);
             }
         }
@@ -137,15 +135,16 @@ int Board::play(char letter, char vertical_char, char horizontal_char){
 }
 
 bool Board::validateLetter(char letter, int v_pos, int h_pos) const{
-    if (v_pos < 0 || v_pos > m_height - 1 || h_pos < 0 || h_pos > m_width - 1
+    if (v_pos < 0 || v_pos >= m_height || h_pos < 0 || h_pos >= m_width
                   || m_board[v_pos][h_pos].placed   || m_board[v_pos][h_pos].letter != letter){
         return false;
     }
     bool valid[2] = {false, false};
-    orientation lines[2] = {H, V};
+    detail::orientation lines[2] = {detail::H, detail::V};
 
     for(int i = 0; i <= 1; i++){
-        orientation line = lines[i];
+        // Letter is valid if it coincides with start marker (which marks first playable letter of a word)
+        detail::orientation line = lines[i];
         valid[line] = m_board[v_pos][h_pos].markers[line].start;
     }
     return valid[0] || valid[1];
@@ -155,10 +154,10 @@ int Board::placeLetter(int v_pos, int h_pos){
     m_board[v_pos][h_pos].placed = true;
     m_empty_tiles--;
     int points = 0;
-    orientation lines[] = {H, V};
+    detail::orientation lines[] = {detail::H, detail::V};
 
     for(int i = 0; i <= 1; i++){
-        orientation line = lines[i];
+        detail::orientation line = lines[i];
         bool placed_behind = m_board[v_pos][h_pos].markers[line].start;
         bool placed_front = m_board[v_pos][h_pos].markers[line].end;
 
@@ -181,13 +180,12 @@ int Board::placeLetter(int v_pos, int h_pos){
     return points;
 }
 
-void Board::shiftMarker(int v, int h, orientation line, int direction){
+void Board::shiftMarker(int v, int h, detail::orientation line, int direction){
     assert(direction == 1 || direction == -1);
-    Position *pos;
+    detail::Position *pos;
     short i = 1;
     do{
-        pos = getPosition(v, h, line, i * direction);
-        i++;
+        pos = getPosition(v, h, line, i++ * direction);
     } while(pos->placed);
 
     if(direction == 1){
@@ -199,6 +197,7 @@ void Board::shiftMarker(int v, int h, orientation line, int direction){
 }
 
 void Board::print() const{
+    std::cout << CLEAR;
     // Print top line
     std::cout << "\n  │ ";
     for(char c = 'a'; c < 'a' + m_width; ++c){

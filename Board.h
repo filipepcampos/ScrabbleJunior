@@ -1,49 +1,51 @@
-#pragma once
+#ifndef BOARD_H
+#define BOARD_H
 #include <string>
 #include <map>
 #include <vector>
 
-#define COLOR "\u001b[31m"
-#define RESET "\u001b[0m"
-
-
 /**
- * Word to be placed on the board
- * vertical_char and horizontal_char represent input ('A' through 'Z' and 'a' through 'z')
+ * This namespace is used to keep helper-structs that are not meant to be used outside this class
  */
-struct Word{
-    int vertical_pos;
-    int horizontal_pos;
-    char orientation;
-    std::string text;
-};
+namespace detail{
+    /**
+     * Word to be placed on the board
+     * vertical_char and horizontal_char represent input ('A' through 'Z' and 'a' through 'z')
+     */
+        struct Word{
+            int vertical_pos;
+            int horizontal_pos;
+            char orientation;
+            std::string text;
+        };
 
-/**
- * Represents a line orientation (Horizontal or Vertical)
- */
-enum orientation{H, V};
+    /**
+     * Represents a line orientation (Horizontal or Vertical)
+     */
+        enum orientation{H = 0, V = 1};
 
-/**
- * Mark the start and end of a word if a tile is placed on a marker it is shifted to the nearest tile that has not been
- * placed.
- * If start = true the position is playable and the first non-empty tile of a word along a specific line
- * If end = true the position if the last playable tile of a word
- */
-struct Markers{
-    bool start = false;
-    bool end = false;
-};
+    /**
+     * Mark the start and end of a word if a tile is placed on a marker it is shifted to the nearest tile that has not been
+     * placed.
+     * If start = true the position is playable and the first non-empty tile of a word along a specific line
+     * If end = true the position if the last playable tile of a word
+     */
+        struct Markers{
+            bool start = false;
+            bool end = false;
+        };
 
-/**
- * Represent a position in the game board
- * If a letter has been placed in this position, placed = true
- * Each position includes information for horizontal and vertical line
- */
-struct Position{
-    char letter = ' ';
-    bool placed = false;
-    std::map<orientation, Markers> markers = {{H, {}}, {V, {}}};
-};
+    /**
+     * Represent a position in the game board
+     * If a letter has been placed in this position, placed = true
+     * Each position includes information for horizontal and vertical line
+     */
+        struct Position{
+            char letter = ' ';
+            bool placed = false;
+            std::map<orientation, Markers> markers = {{H, {}}, {V, {}}};
+        };
+}
 
 class Board{
 public:
@@ -72,7 +74,8 @@ public:
      bool gameOver() const;
 
      /**
-      * Return if board is valid and large enough for n players
+      * Return if board is valid and large enough for n players      *
+      * This condition should be checked before continuing to avoid any unwanted error
       * @param n - number of players
       * @return (bool)
       */
@@ -91,10 +94,10 @@ public:
     std::vector<char> getPlayableLetters() const;
 
 private:
-    Position **m_board;
+    detail::Position **m_board = nullptr;
     int m_height = 0, m_width = 0;
     int m_total_tiles = 0;
-    int m_empty_tiles;
+    int m_empty_tiles = 0;
     bool m_valid = true;
 
     /**
@@ -116,15 +119,15 @@ private:
     /**
      * Add a Word to m_board and m_board_info
      * @param word
-     * @return (none)
+     * @return (bool) true if word was added successfully, false otherwise
      */
-    bool addWord(const Word &word);
+    bool addWord(const detail::Word &word);
 
     /**
      * Verify if the given word is valid
      * @return (bool) true if valid, false otherwise
      */
-    bool validateWord(const Word &word) const;
+    bool validateWord(const detail::Word &word) const;
 
     /**
      * Shift start and end markers from starting position along line and direction
@@ -135,7 +138,7 @@ private:
      * @param line
      * @param direction
      */
-    void shiftMarker(int v, int h, orientation line, int direction);
+    void shiftMarker(int v, int h, detail::orientation line, int direction);
 
     /**
      * Read Words from board file and fill the board
@@ -147,5 +150,7 @@ private:
      * Get nth position counting from (v, h) along the given line
      * @return (Position*)
      */
-    Position* getPosition(int v, int h, orientation line, int n);
+    detail::Position* getPosition(int v, int h, detail::orientation line, int n);
 };
+
+#endif

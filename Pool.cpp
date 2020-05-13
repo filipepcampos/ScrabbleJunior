@@ -1,18 +1,35 @@
 #include "Pool.h"
+#include <algorithm>
+#include <random>
 
 Pool::Pool(const std::vector <char>& letters)
 {
     allLetters = letters;
+    shuffle(allLetters);
 }
+
 char Pool::draw()
 {
-    if (allLetters.size() != 0)
+    if (!allLetters.empty())
     {
-        int number = rand() % (allLetters.size());
-        char c = allLetters.at(number);
-        allLetters.erase(allLetters.begin() + number);
+        char c = allLetters.back();
+        allLetters.pop_back();
         return c;
     }
-    else
-        return ' ';
+    return 0;
+}
+
+void Pool::add(char c){
+    allLetters.push_back(c);
+    shuffle(allLetters);
+}
+
+void Pool::shuffle(std::vector<char> &vec){
+    static std::random_device rd;
+    static std::mt19937 mt(rd());
+    std::shuffle(vec.begin(), vec.end(), mt);
+}
+
+bool Pool::canDraw(){
+    return !allLetters.empty();
 }
