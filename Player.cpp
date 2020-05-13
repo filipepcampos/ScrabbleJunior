@@ -1,7 +1,7 @@
 #include "Player.h"
 
 
-Player::Player(Board& board, Pool& pool)
+Player::Player(const Board& board,const Pool& pool)
 {
     LettersBag Bag(pool);
     m_bag = &Bag;
@@ -15,7 +15,7 @@ void Player::play()
 }
 void Player::readInput()
 {
-    (*m_bag).showBag;
+    m_bag->showBag;
     char delimiter;
     std::cout << "Choose one letter(X) from your bag and the position(Aa) you want to place them\n(\"X-Aa\") :  ";
     while (!(std::cin >> letter >> delimiter >> vertical_char >> horizontal_char) || !(isupper(vertical_char)) || !(islower(horizontal_char)) || delimiter != '-' ||
