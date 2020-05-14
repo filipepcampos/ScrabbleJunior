@@ -7,7 +7,6 @@
 #include <algorithm>
 
 void menuIO::displayScores(std::vector<Player> players){
-    std::cout << CLEAR;
     std::vector<std::pair<int, int>> scores;
     scores.reserve(players.size());
     for(const auto &p : players){
@@ -16,6 +15,7 @@ void menuIO::displayScores(std::vector<Player> players){
     std::stable_sort(scores.begin(), scores.end(), [](std::pair<int, int> p1, std::pair<int, int> p2)->bool{
                                                                             return p1.first > p2.first;
                                                                         });
+    std::cout << CLEAR;
     std::cout << TITLE_COLOR << "SCOREBOARD" << std::endl << std::endl;
     for(const auto &pair : scores){
         std::cout << PLAYER_COLORS[pair.second] << "Player " << pair.second << ": " << pair.first << RESET << std::endl;
