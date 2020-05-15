@@ -38,12 +38,9 @@ void LettersBag::remove(char c) {
     }
 }
 
-void LettersBag::exchangeTile(char c) {
-    if(m_pool->canDraw()){
-        addRandomLetter();
-        remove(c);
-        m_pool->add(c);
-    }
+void LettersBag::replaceTile(char c) {
+    remove(c);
+    m_pool->add(c);
 }
 
 int LettersBag::getSize() const{

@@ -7,7 +7,7 @@ class LettersBag{
 public:
     explicit LettersBag(Pool &m_pool);
     int addRandomLetter(int n = 1);
-    void exchangeTile(char c);
+    void replaceTile(char c);
     void showBag() const;
     int getSize() const;
     void remove(char c);

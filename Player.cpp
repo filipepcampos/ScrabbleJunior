@@ -2,6 +2,7 @@
 #include <sstream>
 #include "Player.h"
 #include "Colors.h"
+#include "Utility.h"
 
 int Player::id_counter = 0;
 
@@ -23,12 +24,12 @@ void Player::play()
         if(canPlay()){
             int points_won = playTurn();
             if(points_won == -1){
-                return;
+                return; // EOF Signal
             }
             score += points_won;
             outputScore();
             played++;
-            pressToContinue();
+            Utility::pressToContinue();
         }
         else{
             skipTurn();
@@ -40,38 +41,21 @@ void Player::play()
     }
 }
 
-void Player::exchangeTiles() {
-    int letters_bag_size = lettersBag.getSize();
-    int tiles_to_exchange = letters_bag_size > 2 ? 2 : letters_bag_size;
-    for(int i = 0; i < tiles_to_exchange; i++){
-        if(m_pool->canDraw()){
-            char c = readLetterToExchange();
-            if(c){
-                lettersBag.exchangeTile(c);
-            }
-            else{
-                // EOF has occurred
-                break;
-            }
-        }
-    }
-}
-
 int Player::playTurn() {
-    char letter, vertical_char, horizontal_char;
+    detail::Play play{};
     int points_won = 0;
     do{
         m_board->print();
-        if(!readInput(letter, vertical_char, horizontal_char)){
-            return -1;
+        if(!readPlay(play)){
+            return -1; // EOF Signal
         };
-        points_won = m_board->play(letter, vertical_char, horizontal_char);
+        points_won = m_board->play(play.letter, play.vertical_char, play.horizontal_char);
 
         if(points_won == -1) {
             outputInvalid();
         }
     } while(points_won == -1);
-    lettersBag.remove(letter);
+    lettersBag.remove(play.letter);
     return points_won;
 }
 
@@ -80,56 +64,87 @@ bool Player::canPlay() const{
     return lettersBag.intersects(playable_letters);
 }
 
-void Player::pressToContinue(){
-    std::cout << "Press any key to continue..." << std::endl;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
-void Player::outputScore() const {
-    std::cout << PLAYER_COLORS[id] << "Score: " << RESET << score << std::endl;
-}
-void Player::outputInvalid(){
-    std::cout << "Invalid input, please re-enter" << std::endl;
-}
-
-void Player::skipTurn() const{
-    std::cout << PLAYER_COLORS[id] << "Turn skipped " << RESET << std::endl;
-    pressToContinue();
-}
-
-bool Player::readInput(char &letter, char &vertical_char, char &horizontal_char) const
+bool Player::readPlay(detail::Play &play) const
 {
     std::cout << std::endl << PLAYER_COLORS[id] << "Player " << id << "'s turn: " << RESET << std::endl;
     lettersBag.showBag();
     std::vector<char> playable_letters = m_board->getPlayableLetters();
 
-    char delimiter;
-    std::cout << "Choose one letter(X) from your bag and the position(Aa) you want to place them\n(\"X-Aa\") :  ";
-    while (!(std::cin >> letter >> delimiter >> vertical_char >> horizontal_char)
-        || !isupper(vertical_char)|| !islower(horizontal_char)|| !isalpha(letter) || delimiter != '-'
-        || !lettersBag.find(::toupper(letter))
-        || std::find(playable_letters.begin(), playable_letters.end(), ::toupper(letter)) == playable_letters.end())
-    {
-        if(std::cin.eof()){
-            return false;
+    std::cout << "Choose one letter(X) from your bag and the position(Aa) you want to place them (\"X-Aa\")";
+    while(true){
+        if(Utility::read(play, convertToPlay)){
+            if(!play.letter){
+                return false; // EOF has occurred if letter is empty
+            }
+            if(testPlay(play, playable_letters)){
+                break;
+            }
         }
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input, please re-enter." << std::endl << "(\"X-Aa\") :  ";
+        std::cout << "Invalid input, please re-enter (\"X-Aa\")";
     }
-    letter = ::toupper(letter);
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return true;
 }
+bool Player::convertToPlay(detail::Play &play, const std::string &str) {
+    std::stringstream ss{str};
+    char delimiter;
+    if(ss >> play.letter >> delimiter >> play.vertical_char >> play.horizontal_char){
+        if(!ss.fail() && !ss.rdbuf()->in_avail() && delimiter == '-'){
+            play.letter = ::toupper(play.letter);
+            return true;
+        }
+    }
+    return false;
+}
+bool Player::testPlay(const detail::Play &play, const std::vector<char> &playable_letters) const{
+    return isupper(play.vertical_char) && islower(play.horizontal_char)
+            && isalpha(play.letter)    && lettersBag.find(play.letter)
+            && std::find(playable_letters.begin(), playable_letters.end(), play.letter) != playable_letters.end();
+}
 
-char Player::readLetterToExchange(){
-    std::string buffer;
-    do{
+void Player::exchangeTiles() {
+    int letters_bag_size = lettersBag.getSize();
+    int tiles_to_exchange = letters_bag_size > 2 ? 2 : letters_bag_size;
+    int can_draw = m_pool->numCanDraw();
+    tiles_to_exchange = std::max(tiles_to_exchange, can_draw);
+    for(int i = 0; i < tiles_to_exchange; i++){
+        char c = readLetterToExchange();
+        if(c){
+            lettersBag.replaceTile(c);
+        }
+        else{
+            break; // EOF has occurred
+        }
+    }
+    lettersBag.addRandomLetter(tiles_to_exchange);
+}
+
+
+char Player::readLetterToExchange() const{
+    char c;
+    while(true){
         lettersBag.showBag();
         std::cout << "Please choose an letter to exchange: ";
-        std::getline(std::cin, buffer);
-        if(std::cin.eof()){
-            return 0;
+        if(Utility::read(c) && testLetterToExchange(c)){
+            if(!c || testLetterToExchange(c)){
+                break;
+            }
         }
-    } while (buffer.size() != 1 || !isalpha(buffer[0]) || !lettersBag.find(::toupper(buffer[0])));
-    return ::toupper(buffer[0]);
+    }
+    return ::toupper(c);
+}
+bool Player::testLetterToExchange(const char &c) const{
+    return !c || (isalpha(c) && lettersBag.find(::toupper(c)));
+}
+
+void Player::outputScore() const {
+    std::cout << PLAYER_COLORS[id] << "Score: " << RESET << score << std::endl;
+}
+void Player::outputInvalid(){
+    std::cout << "Invalid input, please re-enter" << std::endl;
+    Utility::pressToContinue();
+}
+
+void Player::skipTurn() const{
+    std::cout << PLAYER_COLORS[id] << "Turn skipped " << RESET << std::endl;
+    Utility::pressToContinue();
 }

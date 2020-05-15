@@ -164,16 +164,16 @@ int Board::placeLetter(int v_pos, int h_pos){
         m_board[v_pos][h_pos].markers[line].start = false;
         m_board[v_pos][h_pos].markers[line].end = false;
 
-        if(placed_behind && placed_front){
+        if(placed_behind && placed_front){ // Word was completed
             points++;
         }
         else{
             // If word wasn't completed yet, shift the markers
             if(!placed_behind && placed_front){
-                shiftMarker(v_pos, h_pos, line, -1);
+                shiftMarker(v_pos, h_pos, line, -1); // Shift end marker toward start marker
             }
             if(!placed_front && placed_behind) {
-                shiftMarker(v_pos, h_pos, line, 1);
+                shiftMarker(v_pos, h_pos, line, 1); // Shift start marker toward end marker
             }
         }
     }
@@ -215,7 +215,9 @@ void Board::print() const{
         char row_char = 'A' + i;
         std::cout << row_char << " │ ";
         for(int j = 0; j < m_width; ++j){
-            std::string color_code = m_board[i][j].placed ? COLOR : "";
+            std::string color_code = m_board[i][j].placed ? RED : "";
+            bool start_of_word = (m_board[i][j].markers[0].start || m_board[i][j].markers[1].start);
+            color_code = start_of_word ? GREEN : color_code;
             std::cout << color_code << m_board[i][j].letter << ' ' << RESET;
         }
         std::cout << '\n';

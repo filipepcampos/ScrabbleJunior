@@ -43,7 +43,7 @@ namespace detail{
         struct Position{
             char letter = ' ';
             bool placed = false;
-            std::map<orientation, Markers> markers = {{H, {}}, {V, {}}};
+            Markers markers[2]{};
         };
 }
 

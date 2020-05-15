@@ -4,6 +4,14 @@
 #include "Board.h"
 #include "LettersBag.h"
 
+namespace detail{
+    struct Play{
+        char letter;
+        char vertical_char;
+        char horizontal_char;
+    };
+}
+
 class Player
 {
 public:
@@ -14,14 +22,13 @@ public:
     void play();
 
 private:
-    Board* m_board;
-    Pool* m_pool;
+    Board* const m_board;
+    Pool* const m_pool;
     LettersBag lettersBag;
     static int id_counter;
     const int id;
     int score;
 
-    // ---------------- Data Methods ----------------
     /**
      * Play a single turn
      * @return points won in turn or -1 if EOF has occurred
@@ -40,26 +47,20 @@ private:
      */
     void exchangeTiles();
 
-    // ----------------- IO Methods ------------------
     /**
      * Read turn input
-     * @param letter - letter to play
-     * @param vertical_char - vertical position
-     * @param horizontal_char - horizontal position
      * @return true if read was successful, false otherwise (EOF)
      */
-    bool readInput(char &letter, char &vertical_char, char &horizontal_char) const;
+    bool readPlay(detail::Play &play) const;
+    bool testPlay(const detail::Play &play, const std::vector<char> &playable_letters) const;
+    static bool convertToPlay(detail::Play &play, const std::string &str);
 
     /**
      * Read a single letter to be exchanged
      * @return char present in letterBag or 0 if EOF has occurred
      */
-    char readLetterToExchange();
-
-    /**
-     * Prompt user to press any key to continue
-     */
-    static void pressToContinue();
+    char readLetterToExchange() const;
+    bool testLetterToExchange(const char &c) const;
 
     /**
      * Skip a turn

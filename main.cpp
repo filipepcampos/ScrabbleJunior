@@ -20,26 +20,27 @@ int runGame(const std::string &file_name, int num_players){
             players[i].play();
             i = ++i % num_players;
         }
-        menuIO::displayScores(players);
+        MenuIO::displayScores(players);
     }
     else{
-        menuIO::invalid();
+        MenuIO::invalid();
     }
 }
 
 int main() {
     while(!std::cin.eof()){
-        char option = menuIO::readMenu();
-        if(option == '3'){break;}
+        int option = MenuIO::readMenu();
+        if(option == 0 || option == 3){break;}
 
-        std::string boardName = menuIO::readBoardName();
+        std::string boardName = MenuIO::readBoardName();
         if(boardName.empty()){break;}
 
-        int num_players = menuIO::readNumPlayers();
-        if(!num_players){break;}
+        int num_players = MenuIO::readNumPlayers();
+        if(num_players <= 0){break;}
 
         runGame(boardName, num_players);
-        menuIO::returnToMenu();
+        MenuIO::returnToMenu();
     }
+    std::cout << std::endl;
     return 0;
 }

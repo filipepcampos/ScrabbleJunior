@@ -1,12 +1,12 @@
 #include "MenuIO.h"
 #include "Player.h"
 #include "Colors.h"
+#include "Utility.h"
 #include <string>
 #include <vector>
-#include <sstream>
 #include <algorithm>
 
-void menuIO::displayScores(std::vector<Player> players){
+void MenuIO::displayScores(const std::vector<Player> &players){
     std::vector<std::pair<int, int>> scores;
     scores.reserve(players.size());
     for(const auto &p : players){
@@ -22,30 +22,27 @@ void menuIO::displayScores(std::vector<Player> players){
     }
 }
 
-int menuIO::readNumPlayers(){
-    std::string buffer{};
-    bool valid = false;
+void MenuIO::returnToMenu() {
+    Utility::pressToContinue("Press any key to return to menu...");
+}
+
+int MenuIO::readNumPlayers(){
     int num = 0;
-    while(!valid){
+    while(true){
         std::cout << CLEAR; std::cout << "Number of players (2 to 4): ";
-        valid = true;
-        std::getline(std::cin, buffer);
-        if(std::cin.eof()){
-            std::cout << std::endl;
-            return 0;
-        }
-        std::stringstream ss(buffer);
-        ss >> num;
-        if(ss.fail() || num < 2 || num > 4){
-            valid = false;
+        if(Utility::read(num) && (!num || testNumPlayers(num))){
+            break;
         }
     }
     return num;
 }
+bool MenuIO::testNumPlayers(const int &n) {
+    return n >= 2 && n <= 4;
+}
 
-char menuIO::readMenu() {
-    std::string buffer{};
-    while (buffer != "1" && buffer != "3") {
+int MenuIO::readMenu() {
+    int option;
+    while(true) {
         std::cout << CLEAR;
         std::cout << TITLE_COLOR << " _____                _     _     _          ___             _            \n"
                                     "/  ___|              | |   | |   | |        |_  |           (_)           \n"
@@ -54,21 +51,23 @@ char menuIO::readMenu() {
                                     "/\\__/ / (__| | | (_| | |_) | |_) | |  __/ /\\__/ / |_| | | | | | (_) | |   \n"
                                     "\\____/ \\___|_|  \\__,_|_.__/|_.__/|_|\\___| \\____/ \\__,_|_| |_|_|\\___/|_|\n\n"
                                     << RESET;
-        std::cout <<  "(1) - Start new game\n" << "(2) - How to play\n" <<"(3) - Exit game\n\n" << "> ";
-        std::getline(std::cin, buffer);
+        std::cout <<  "(1) - Start new game\n" << "(2) - How to play\n" <<"(3) - Exit game\n\n";
 
-        if(buffer == "2"){
-            showInstructions();
-        }
-        if (std::cin.eof()) {
-            buffer = "3";
+        if(Utility::read(option) && (!option ||testMenu(option))){
+            break;
         }
     }
-    std::cout << std::endl;
-    return buffer[0];
+    return option;
+}
+bool MenuIO::testMenu(const int &n){
+    switch(n){
+        case 1: case 3: return true;
+        case 2: showInstructions();
+    }
+    return false;
 }
 
-void menuIO::showInstructions() {
+void MenuIO::showInstructions() {
     std::cout << CLEAR;
     std::cout << TITLE_COLOR << " _   _                 _                _             \n"
                                 "| | | |               | |              | |            \n"
@@ -78,42 +77,37 @@ void menuIO::showInstructions() {
                                 "\\_| |_/\\___/ \\_/\\_/    \\__\\___/  | .__/|_|\\__,_|\\__, |\n"
                                 "                                 | |             __/ |\n"
                                 "                                 |_|            |___/ \n\n" << RESET;
-    std::cout << "On your turn, play two of your tiles by covering letters on the gameboard squares with matching tiles.\n" <<
-    "You must cover the first available open letter of a word.\n\n";
-    returnToMenu();
+    std::cout << "On your turn, play two of your tiles by covering letters on the game board squares with matching tiles.\n" <<
+    "You must cover the first available open letter of a word.\n" <<
+    "Placed tiles will be presented in " << RED << "RED\n" << RESET <<
+    "Playable tiles will be " << GREEN << "GREEN\n" << RESET;
+    Utility::pressToContinue();
 }
 
-std::string menuIO::readBoardName(){
-    std::string buffer{};
-    bool read = false;
-    while(!read){
-        read = true;
-        std::cout << CLEAR; std::cout << "Please enter the board name\n" << "> ";
-        std::getline(std::cin, buffer);
-        if(std::cin.eof()){
-            // If EOF occurs, board name has been "read" and empty str will be returned to signal EOF occurred
-            buffer.clear();
-        }
-        else if(buffer.empty()){
-            read = false;
-        }
-        for(const auto &c : buffer){
-            if(!isalnum(c)){
-                read = false;
-            }
+std::string MenuIO::readBoardName(){
+    std::string name{};
+    while(true){
+        std::cout << CLEAR; std::cout << "Please enter the board name";
+        if(Utility::read(name) && (name.empty() || testBoardName(name))){
+            break;
         }
     }
     std::cout << std::endl;
-    return buffer;
+    return name;
 }
-
-void menuIO::returnToMenu() {
-    if(!std::cin.eof()){
-        std::cout << "Press any key to return to menu..." << std::endl;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+bool MenuIO::testBoardName(const std::string &name){
+    if(!name.empty()){
+        for(const auto &c : name){
+            if(!isalnum(c)){
+                return false;
+            }
+        }
+        return true;
     }
+    return false;
 }
 
-void menuIO::invalid() {
+
+void MenuIO::invalid() {
     std::cout << COLOR << "There are too many players or board isn't valid" << RESET << std::endl;
 }

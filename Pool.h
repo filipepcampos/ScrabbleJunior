@@ -26,9 +26,9 @@ public:
     char draw();
 
     /**
-     * If allLetters isn't empty output true, false otherwise
+     * How many tiles can a player draw
      */
-    bool canDraw();
+    int numCanDraw();
 
     /**
      * Add a new letter to the pool, reshuffling it

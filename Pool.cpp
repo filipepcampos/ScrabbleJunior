@@ -30,6 +30,6 @@ void Pool::shuffle(std::vector<char> &vec){
     std::shuffle(vec.begin(), vec.end(), mt);
 }
 
-bool Pool::canDraw(){
-    return !allLetters.empty();
+int Pool::numCanDraw(){
+    return allLetters.size() >= 2 ? 2 : allLetters.size();
 }
