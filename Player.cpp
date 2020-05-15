@@ -26,7 +26,7 @@ void Player::play()
 {
     int played = 0;
     for(int i = 0; i < 2; i++){
-        if(canPlay()){
+        if(false){
             int points_won = 0;
             try{
                 points_won = playTurn();
@@ -102,7 +102,7 @@ void Player::exchangeTiles() {
     std::cout << CLEAR;
     m_board->print();
     std::cout << std::endl << PLAYER_COLORS[id] << "Player " << id << RESET
-              <<", exchange " << tiles_to_exchange << " letters:" << std::endl;
+              <<", exchange " << tiles_to_exchange << " letters:\n";
     for(int i = 0; i < tiles_to_exchange; i++){
         char c;
         try{
@@ -118,11 +118,12 @@ void Player::exchangeTiles() {
 char Player::readLetterToExchange() const{
     char c;
     while(true){
+        std::cout << "\nPlease choose an letter to exchange: ";
         letterBag.showBag();
-        std::cout << "Please choose an letter to exchange: ";
         if(Utility::read(c) && testLetterToExchange(c)){
             break;
         }
+        std::cout << std::endl;
     }
     return ::toupper(c);
 }
