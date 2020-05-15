@@ -9,7 +9,7 @@
 #define MAGENTA "\033[35m"
 #define CYAN    "\033[36m"
 
-#define COLOR RED
+#define ERROR_COLOR RED
 #define TITLE_COLOR CYAN
 #define RESET "\u001b[0m"
 #define CLEAR "\033[2J\033[1;1H"

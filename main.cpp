@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Pool.h"
 #include "Colors.h"
+#include "Utility.h"
 
 int runGame(const std::string &file_name, int num_players){
     Board board(file_name);
@@ -29,16 +30,20 @@ int runGame(const std::string &file_name, int num_players){
 
 int main() {
     while(!std::cin.eof()){
-        int option = MenuIO::readMenu();
-        if(option == 0 || option == 3){break;}
-
-        std::string boardName = MenuIO::readBoardName();
-        if(boardName.empty()){break;}
-
-        int num_players = MenuIO::readNumPlayers();
-        if(num_players <= 0){break;}
-
-        runGame(boardName, num_players);
+        int option, num_players;
+        std::string board_name;
+        try{
+            option = MenuIO::readMenu();
+            if(option == 3){
+                break;
+            }
+            board_name = MenuIO::readBoardName();
+            num_players = MenuIO::readNumPlayers();
+        }
+        catch(const Utility::CinEofError &e){
+            break;
+        }
+        runGame(board_name, num_players);
         MenuIO::returnToMenu();
     }
     std::cout << std::endl;

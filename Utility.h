@@ -5,8 +5,24 @@
 #include <iostream>
 
 namespace Utility{
+    /**
+     * Wait for user input to continue
+     * @param msg
+     */
     void pressToContinue(const std::string &msg = "Press any key to continue...");
 
+    /**
+     * Thrown when read() detects EOF
+     */
+    class CinEofError : public std::exception{};
+
+    /**
+     * Converter used by read() by default
+     * @tparam T
+     * @param var
+     * @param str
+     * @return true if successful
+     */
     template <typename T>
     bool defaultConverter(T &var, const std::string &str){
         std::stringstream ss{str};
@@ -26,11 +42,10 @@ namespace Utility{
         std::string buffer;
         std::getline(std::cin, buffer);
         if (std::cin.eof()) {
-            var = T{};
-            return true;
+            throw CinEofError();
         }
         return (*convert)(var, buffer); // True if successful
-    };
+    }
 }
 
 #endif

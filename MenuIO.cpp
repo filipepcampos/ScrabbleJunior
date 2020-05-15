@@ -2,8 +2,6 @@
 #include "Player.h"
 #include "Colors.h"
 #include "Utility.h"
-#include <string>
-#include <vector>
 #include <algorithm>
 
 void MenuIO::displayScores(const std::vector<Player> &players){
@@ -51,9 +49,9 @@ int MenuIO::readMenu() {
                                     "/\\__/ / (__| | | (_| | |_) | |_) | |  __/ /\\__/ / |_| | | | | | (_) | |   \n"
                                     "\\____/ \\___|_|  \\__,_|_.__/|_.__/|_|\\___| \\____/ \\__,_|_| |_|_|\\___/|_|\n\n"
                                     << RESET;
-        std::cout <<  "(1) - Start new game\n" << "(2) - How to play\n" <<"(3) - Exit game\n\n";
+        std::cout <<  "(1) - Start new game\n" << "(2) - How to play\n" <<"(3) - Exit game\n";
 
-        if(Utility::read(option) && (!option ||testMenu(option))){
+        if(Utility::read(option) && testMenu(option)){
             break;
         }
     }
@@ -109,5 +107,5 @@ bool MenuIO::testBoardName(const std::string &name){
 
 
 void MenuIO::invalid() {
-    std::cout << COLOR << "There are too many players or board isn't valid" << RESET << std::endl;
+    std::cout << ERROR_COLOR << "There are too many players or board isn't valid" << RESET << std::endl;
 }

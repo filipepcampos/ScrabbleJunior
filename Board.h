@@ -11,6 +11,7 @@ namespace detail{
     /**
      * Word to be placed on the board
      * vertical_char and horizontal_char represent input ('A' through 'Z' and 'a' through 'z')
+     * orientation is a char 'H' (horizontal) or 'V' (vertical)
      */
         struct Word{
             int vertical_pos;
@@ -22,11 +23,10 @@ namespace detail{
     /**
      * Represents a line orientation (Horizontal or Vertical)
      */
-        enum orientation{H = 0, V = 1};
+        enum orientation{H = 0, V};
 
     /**
-     * Mark the start and end of a word if a tile is placed on a marker it is shifted to the nearest tile that has not been
-     * placed.
+     * Mark the start and end of a word if a tile is placed on a marker it is shifted to the nearest unplaced position
      * If start = true the position is playable and the first non-empty tile of a word along a specific line
      * If end = true the position if the last playable tile of a word
      */
@@ -38,7 +38,8 @@ namespace detail{
     /**
      * Represent a position in the game board
      * If a letter has been placed in this position, placed = true
-     * Each position includes information for horizontal and vertical line
+     * Each position includes information (markers) for horizontal and vertical line, the
+     * usually the array will be accessed using orientation as index
      */
         struct Position{
             char letter = ' ';
@@ -74,7 +75,7 @@ public:
      bool gameOver() const;
 
      /**
-      * Return if board is valid and large enough for n players      *
+      * Return if board is valid and large enough for n players
       * This condition should be checked before continuing to avoid any unwanted error
       * @param n - number of players
       * @return (bool)
@@ -101,23 +102,13 @@ private:
     bool m_valid = true;
 
     /**
-     * Verifies if a letter can be placed returning the bool result
-     * @param vertical_pos
-     * @param horizontal_pos
-     * @return (bool) valid or not
+     * Read Words from board file and fill the board
+     * @return (none)
      */
-    bool validateLetter(char letter, int vertical_pos, int horizontal_pos) const;
+    void fillBoard(std::ifstream &file);
 
     /**
-     * Place a letter, shift markers if needed and return points won
-     * @param vertical_pos
-     * @param horizontal_pos
-     * @return (int) points won by placement
-     */
-    int placeLetter(int vertical_pos, int horizontal_pos);
-
-    /**
-     * Add a Word to m_board and m_board_info
+     * Add a Word to m_board
      * @param word
      * @return (bool) true if word was added successfully, false otherwise
      */
@@ -130,9 +121,27 @@ private:
     bool validateWord(const detail::Word &word) const;
 
     /**
-     * Shift start and end markers from starting position along line and direction
+     * Place a letter, shift markers if needed and return points won
+     * @param vertical_pos
+     * @param horizontal_pos
+     * @return (int) points won by placement
+     */
+    int placeLetter(int vertical_pos, int horizontal_pos);
+
+    /**
+     * Verifies if a letter can be placed returning the bool result
+     * @param vertical_pos
+     * @param horizontal_pos
+     * @return (bool) valid or not
+     */
+    bool validateLetter(char letter, int vertical_pos, int horizontal_pos) const;
+
+
+    /**
+     * Shift start or end marker from starting position along line and direction
      * If direction == -1, end marker will be shifted to the left
      * If direction == 1, start marker will be shifted to the right
+     * Marker will be shifted to nearest unplaced position
      * @param v
      * @param h
      * @param line
@@ -140,11 +149,6 @@ private:
      */
     void shiftMarker(int v, int h, detail::orientation line, int direction);
 
-    /**
-     * Read Words from board file and fill the board
-     * @return (none)
-     */
-    void fillBoard(std::ifstream &file);
 
     /**
      * Get nth position counting from (v, h) along the given line

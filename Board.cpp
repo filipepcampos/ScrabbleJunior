@@ -1,6 +1,5 @@
 #include "Board.h"
 #include <fstream>
-#include <string>
 #include <limits>
 #include <iostream>
 #include <cassert>
@@ -15,7 +14,7 @@ Board::Board(const std::string &file_name){
         return;
     }
 
-    char delimiter;
+    char delimiter{};
     file >> m_height >> delimiter >> m_width;
     if(file.fail() || delimiter != 'x' || m_height <= 0 || m_height > 20 || m_width <= 0 || m_width > 20){
         m_valid = false;
@@ -43,7 +42,7 @@ Board::~Board(){
 
 void Board::fillBoard(std::ifstream &file) {
     std::string buffer;
-    while(getline(file, buffer) && !buffer.empty() && !file.eof()){
+    while(getline(file, buffer) && !buffer.empty()){
         char v_char = buffer[0], h_char = buffer[1], orientation = buffer[3];
         std::string text = buffer.substr(5);
         int v_pos = v_char - 'A', h_pos = h_char - 'a';
@@ -84,46 +83,10 @@ bool Board::validateWord(const detail::Word &word) const{
         }
     }
     int orientation_int = word.orientation == 'V' ? 1 : 0;
+    // orientation_int is used to move along word's line
     return !(word.horizontal_pos < 0  || word.horizontal_pos + word.text.length() * (1 - orientation_int) > m_width
              || word.vertical_pos < 0 || word.vertical_pos + word.text.length() * orientation_int > m_height
              || (word.orientation != 'H' && word.orientation != 'V'));
-}
-
-detail::Position *Board::getPosition(int v, int h, detail::orientation line, int n) {
-    return &m_board[v + n * line][h + n * (1 - line)];
-}
-
-std::vector<char> Board::getLetters() const{
-    std::vector<char> letters;
-    letters.reserve(m_total_tiles);
-    for(int i = 0; i < m_height; i++){
-        for(int j = 0; j < m_width; j++){
-            if(m_board[i][j].letter != ' '){
-                letters.push_back(m_board[i][j].letter);
-            }
-        }
-    }
-    return letters;
-}
-
-std::vector<char> Board::getPlayableLetters() const{
-    std::vector<char> letters;
-    for(int i = 0; i < m_height; i++){
-        for(int j = 0; j < m_width; j++){
-            if(m_board[i][j].markers[detail::H].start || m_board[i][j].markers[detail::V].start){
-                letters.push_back(m_board[i][j].letter);
-            }
-        }
-    }
-    return letters;
-}
-
-bool Board::gameOver() const{
-    return m_empty_tiles <= 0;
-}
-
-bool Board::valid(int n) const {
-    return m_valid && m_empty_tiles >= 7 * n;
 }
 
 int Board::play(char letter, char vertical_char, char horizontal_char){
@@ -136,7 +99,7 @@ int Board::play(char letter, char vertical_char, char horizontal_char){
 
 bool Board::validateLetter(char letter, int v_pos, int h_pos) const{
     if (v_pos < 0 || v_pos >= m_height || h_pos < 0 || h_pos >= m_width
-                  || m_board[v_pos][h_pos].placed   || m_board[v_pos][h_pos].letter != letter){
+        || m_board[v_pos][h_pos].placed   || m_board[v_pos][h_pos].letter != letter){
         return false;
     }
     bool valid[2] = {false, false};
@@ -194,6 +157,43 @@ void Board::shiftMarker(int v, int h, detail::orientation line, int direction){
     else{
         pos->markers[line].end = true;
     }
+}
+
+detail::Position *Board::getPosition(int v, int h, detail::orientation line, int n) {
+    return &m_board[v + n * line][h + n * (1 - line)];
+}
+
+std::vector<char> Board::getLetters() const{
+    std::vector<char> letters;
+    letters.reserve(m_total_tiles);
+    for(int i = 0; i < m_height; i++){
+        for(int j = 0; j < m_width; j++){
+            if(m_board[i][j].letter != ' '){
+                letters.push_back(m_board[i][j].letter);
+            }
+        }
+    }
+    return letters;
+}
+
+std::vector<char> Board::getPlayableLetters() const{
+    std::vector<char> letters;
+    for(int i = 0; i < m_height; i++){
+        for(int j = 0; j < m_width; j++){
+            if(m_board[i][j].markers[detail::H].start || m_board[i][j].markers[detail::V].start){
+                letters.push_back(m_board[i][j].letter);
+            }
+        }
+    }
+    return letters;
+}
+
+bool Board::gameOver() const{
+    return m_empty_tiles <= 0;
+}
+
+bool Board::valid(int n) const {
+    return m_valid && m_empty_tiles >= 7 * n;
 }
 
 void Board::print() const{
