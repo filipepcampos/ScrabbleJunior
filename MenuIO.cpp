@@ -78,7 +78,7 @@ void MenuIO::showInstructions() {
     std::cout << "On your turn, play two of your tiles by covering letters on the game board squares with matching tiles.\n" <<
     "You must cover the first available open letter of a word.\n" <<
     "Placed tiles will be presented in " << RED << "RED\n" << RESET <<
-    "Playable tiles will be " << GREEN << "GREEN\n" << RESET;
+    "All first available open letters of a word will be " << GREEN << "GREEN\n" << RESET;
     Utility::pressToContinue();
 }
 
