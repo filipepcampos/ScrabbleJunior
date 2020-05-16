@@ -41,7 +41,7 @@ int main() {
             num_players = MenuIO::readNumPlayers();
         }
         catch(const Utility::CinEofError &e){
-            break;
+            break; // If EOF happens, program closes normally
         }
         runGame(board_name, num_players);
         MenuIO::returnToMenu();

@@ -26,7 +26,7 @@ void Player::play()
 {
     int played = 0;
     for(int i = 0; i < 2; i++){
-        if(false){
+        if(canPlay()){
             int points_won = 0;
             try{
                 points_won = playTurn();
