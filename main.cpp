@@ -6,7 +6,7 @@
 #include "Colors.h"
 #include "Utility.h"
 
-int runGame(const std::string &file_name, int num_players){
+void runGame(const std::string &file_name, int num_players){
     Board board(file_name);
     Pool pool(board.getLetters());
 
