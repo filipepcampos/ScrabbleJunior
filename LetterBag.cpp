@@ -25,7 +25,7 @@ int LetterBag::addLetter(int n) {
 }
 
 void LetterBag::showBag() const{
-    for(auto c : letterBag){
+    for(const auto &c : letterBag){
         std::cout << c << ", ";
     }
     std::cout << std::endl;

@@ -77,7 +77,7 @@ bool Board::addWord(const detail::Word &word) {
 }
 
 bool Board::validateWord(const detail::Word &word) const{
-    for(auto c : word.text){
+    for(const auto &c : word.text){
         if(!isalpha(c)){
             return false;
         }
