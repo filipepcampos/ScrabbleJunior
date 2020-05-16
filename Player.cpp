@@ -38,7 +38,7 @@ void Player::play()
             played++;
             Utility::pressToContinue();
         }
-        else if(played == 1){
+        else if(played == 1 && !m_board->gameOver()){
             skipTurn();
         }
     }
@@ -131,7 +131,7 @@ bool Player::testLetterToExchange(const char &c) const{
 }
 
 void Player::outputScore() const {
-    std::cout << PLAYER_COLORS[id] << "Score: " << RESET << score << std::endl;
+    std::cout << PLAYER_COLORS[id] << "\nScore: " << RESET << score << std::endl;
 }
 void Player::outputInvalid(){
     std::cout << "Invalid input, please re-enter" << std::endl;
@@ -139,6 +139,6 @@ void Player::outputInvalid(){
 }
 
 void Player::skipTurn() const{
-    std::cout << PLAYER_COLORS[id] << "Turn skipped " << RESET << std::endl << std::endl;
+    std::cout << PLAYER_COLORS[id] << "Turn skipped " << RESET << std::endl;
     Utility::pressToContinue();
 }
