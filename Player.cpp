@@ -95,9 +95,8 @@ bool Player::testPlay(const detail::Play &play, const std::vector<char> &playabl
 }
 
 void Player::exchangeTiles() {
-    int letters_bag_size = letterBag.getSize();
-    int tiles_to_exchange = letters_bag_size > 2 ? 2 : letters_bag_size;
-    tiles_to_exchange = std::max(tiles_to_exchange, m_pool->numCanDraw());
+    int tiles_to_exchange = std::max(letterBag.getSize(), m_pool->getSize());
+    tiles_to_exchange = tiles_to_exchange > 2 ? 2 : tiles_to_exchange;
 
     std::cout << CLEAR;
     m_board->print();

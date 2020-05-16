@@ -22,9 +22,9 @@ public:
     char draw();
 
     /**
-     * How many tiles can a player draw
+     * How many tiles are available
      */
-    int numCanDraw();
+    int getSize() const;
 
     /**
      * Add a new letter to the pool, reshuffling it
