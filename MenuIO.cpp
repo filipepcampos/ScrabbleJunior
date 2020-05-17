@@ -8,15 +8,22 @@ void MenuIO::displayScores(const std::vector<Player> &players){
     std::vector<std::pair<int, int>> scores;
     scores.reserve(players.size());
     for(const auto &p : players){
-        scores.emplace_back(p.getScore(), p.getId());
+        scores.emplace_back(p.getId(), p.getScore());
     }
     std::stable_sort(scores.begin(), scores.end(), [](std::pair<int, int> p1, std::pair<int, int> p2)->bool{
-                                                                            return p1.first > p2.first;
+                                                                            return p1.second > p2.second;
                                                                         });
     std::cout << CLEAR;
-    std::cout << TITLE_COLOR << "SCOREBOARD" << std::endl << std::endl;
+    if(scores[0].second > scores[1].second){
+        int id = scores[0].first;
+        std::cout << PLAYER_COLORS[id] << "Player " << id << RESET << " wins!\n\n";
+    }
+    else{
+        std::cout << "Game ended in a tie\n\n";
+    }
+    std::cout << "SCOREBOARD\n";
     for(const auto &pair : scores){
-        std::cout << PLAYER_COLORS[pair.second] << "Player " << pair.second << ": " << pair.first << RESET << std::endl;
+        std::cout << PLAYER_COLORS[pair.first] << "Player " << pair.first << ": " << pair.second << RESET << std::endl;
     }
 }
 
@@ -26,12 +33,9 @@ void MenuIO::returnToMenu() {
 
 int MenuIO::readNumPlayers(){
     int num = 0;
-    while(true){
+    do{
         std::cout << CLEAR; std::cout << "Number of players (2 to 4): ";
-        if(Utility::read(num) && (!num || testNumPlayers(num))){
-            break;
-        }
-    }
+    } while( !(Utility::read(num) && testNumPlayers(num)));
     return num;
 }
 bool MenuIO::testNumPlayers(const int &n) {
@@ -40,7 +44,7 @@ bool MenuIO::testNumPlayers(const int &n) {
 
 int MenuIO::readMenu() {
     int option;
-    while(true) {
+    do{
         std::cout << CLEAR;
         std::cout << TITLE_COLOR << " _____                _     _     _          ___             _            \n"
                                     "/  ___|              | |   | |   | |        |_  |           (_)           \n"
@@ -48,13 +52,9 @@ int MenuIO::readMenu() {
                                     " `--. \\/ __| '__/ _` | '_ \\| '_ \\| |/ _ \\     | | | | | '_ \\| |/ _ \\| '__|\n"
                                     "/\\__/ / (__| | | (_| | |_) | |_) | |  __/ /\\__/ / |_| | | | | | (_) | |   \n"
                                     "\\____/ \\___|_|  \\__,_|_.__/|_.__/|_|\\___| \\____/ \\__,_|_| |_|_|\\___/|_|\n\n"
-                                    << RESET;
+                  << RESET;
         std::cout <<  "(1) - Start new game\n" << "(2) - How to play\n" <<"(3) - Exit game\n";
-
-        if(Utility::read(option) && testMenu(option)){
-            break;
-        }
-    }
+    } while( !(Utility::read(option) && testMenu(option)) );
     return option;
 }
 bool MenuIO::testMenu(const int &n){
@@ -83,26 +83,20 @@ void MenuIO::showInstructions() {
 }
 
 std::string MenuIO::readBoardName(){
-    std::string name{};
-    while(true){
-        std::cout << CLEAR; std::cout << "Please enter the board name";
-        if(Utility::read(name) && (name.empty() || testBoardName(name))){
-            break;
-        }
-    }
+    std::string name;
+    do{
+        std::cout << CLEAR; std::cout << "Please enter board name";
+    } while( !(Utility::read(name) && testBoardName(name)) );
     std::cout << std::endl;
     return name;
 }
 bool MenuIO::testBoardName(const std::string &name){
-    if(!name.empty()){
-        for(const auto &c : name){
-            if(!isalnum(c)){
-                return false;
-            }
+    for(const auto &c : name){
+        if(!isalnum(c)){
+            return false;
         }
-        return true;
     }
-    return false;
+    return !name.empty(); // True if not empty
 }
 
 

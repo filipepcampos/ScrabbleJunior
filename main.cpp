@@ -17,7 +17,7 @@ void runGame(const std::string &file_name, int num_players){
             players.emplace_back(board, pool);
         }
         int i = 0;
-        while(!board.gameOver() && !std::cin.eof()){
+        while(!board.gameOver()){
             players[i].play();
             i = ++i % num_players;
         }

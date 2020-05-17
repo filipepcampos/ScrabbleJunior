@@ -24,7 +24,7 @@ bool Player::canPlay() const{
 
 void Player::play()
 {
-    int played = 0;
+    int played_turns = 0;
     for(int i = 0; i < 2; i++){
         if(canPlay()){
             int points_won = 0;
@@ -35,15 +35,15 @@ void Player::play()
             }
             score += points_won;
             outputScore();
-            played++;
+            played_turns++;
             Utility::pressToContinue();
         }
-        else if(played == 1 && !m_board->gameOver()){
+        else if(played_turns == 1 && !m_board->gameOver()){
             skipTurn();
         }
     }
-    letterBag.addLetter(played);
-    if(!played){
+    letterBag.addLetter(played_turns);
+    if(!played_turns){
        exchangeTiles();
     }
 }
@@ -58,7 +58,7 @@ int Player::playTurn() {
         if(points_won == -1) {
             outputInvalid();
         }
-    } while(points_won == -1);
+    } while(points_won == -1); // m_board->play returns -1 when move was invalid
     letterBag.remove(play.letter);
     return points_won;
 }
@@ -70,10 +70,8 @@ void Player::readPlay(detail::Play &play) const
     std::vector<char> playable_letters = m_board->getPlayableLetters();
 
     std::cout << "Choose one letter(X) from your bag and the position(Aa) you want to place them (\"X-Aa\")";
-    while(true){
-        if(Utility::read(play, convertToPlay) && testPlay(play, playable_letters)){
-            break;
-        }
+
+    while( !(Utility::read(play, convertToPlay) && testPlay(play, playable_letters)) ){
         std::cout << "Invalid input, please re-enter (\"X-Aa\")";
     }
 }
@@ -116,14 +114,10 @@ void Player::exchangeTiles() {
 
 char Player::readLetterToExchange() const{
     char c;
-    while(true){
-        std::cout << "\nPlease choose an letter to exchange: ";
+    do{
+        std::cout << "\n\nPlease choose an letter to exchange: ";
         letterBag.showBag();
-        if(Utility::read(c) && testLetterToExchange(c)){
-            break;
-        }
-        std::cout << std::endl;
-    }
+    } while(! (Utility::read(c) && testLetterToExchange(c)));
     return ::toupper(c);
 }
 bool Player::testLetterToExchange(const char &c) const{

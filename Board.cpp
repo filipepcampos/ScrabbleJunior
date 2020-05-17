@@ -189,7 +189,7 @@ std::vector<char> Board::getPlayableLetters() const{
 }
 
 bool Board::gameOver() const{
-    return m_empty_tiles <= 0;
+    return m_empty_tiles <= 0 || std::cin.eof();
 }
 
 bool Board::valid(int n) const {
